@@ -1,0 +1,2 @@
+# KTBaseAdapter
+ very powerful
