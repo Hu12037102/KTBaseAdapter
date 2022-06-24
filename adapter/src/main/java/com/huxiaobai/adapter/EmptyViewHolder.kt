@@ -11,7 +11,7 @@ import androidx.appcompat.widget.AppCompatTextView
  * 描述:
  */
 class EmptyViewHolder(itemView: View) : BaseViewHolder(itemView) {
-    private val mAivEmpty: AppCompatImageView = itemView.findViewById(R.id.aiv_empty)
-    private val mAtvContent:AppCompatTextView= itemView.findViewById(R.id.atv_empty)
+     val mAivEmpty: AppCompatImageView = itemView.findViewById(R.id.aiv_empty)
+     val mAtvContent:AppCompatTextView= itemView.findViewById(R.id.atv_empty)
 
 }

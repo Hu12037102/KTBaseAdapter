@@ -5,8 +5,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.isVisible
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -26,12 +27,26 @@ abstract class BaseRecyclerAdapter<T>(
     protected val mHeadParentGroup: ConstraintLayout = ConstraintLayout(mContext)
     protected val mFootParentGroup: ConstraintLayout = ConstraintLayout(mContext)
     private var mOnRecyclerViewItemClickListener: OnRecyclerViewItemClickListener? = null
-    private var isFirstShowEmptyView = false
+    private var mEmptyText: CharSequence = mContext.getText(R.string.this_is_null_null)
+
+    @DrawableRes
+    private var mEmptyRes: Int = R.mipmap.icon_empty_background
+
+    // private var isFirstShowEmptyView = false
+    private var isShowEmptyView = false
     var mHasHeadView = false
     var mHasFootView = false
+    fun setShowEmptyView(isShowEmptyView: Boolean) {
+        this.isShowEmptyView = isShowEmptyView
+    }
+
+    fun setEmptyData(emptyText: CharSequence, @DrawableRes emptyRes: Int) {
+        this.mEmptyText = emptyText
+        this.mEmptyRes = emptyRes
+    }
 
     companion object {
-       const val TYPE_HEAD_VIEW = 100
+        const val TYPE_HEAD_VIEW = 100
         const val TYPE_FOOT_VIEW = 101
         const val TYPE_EMPTY_VIEW = 102
     }
@@ -76,7 +91,7 @@ abstract class BaseRecyclerAdapter<T>(
         var count = 0
         val listSize = BaseCompat.listSize(mData)
         count += if (listSize == 0) {
-            1
+            if (isShowEmptyView) 1 else 0
         } else {
             listSize
         }
@@ -102,7 +117,7 @@ abstract class BaseRecyclerAdapter<T>(
             isFootViewPosition(position) -> {
                 TYPE_FOOT_VIEW
             }
-            BaseCompat.listSize(mData) == 0 -> {
+            BaseCompat.listSize(mData) == 0 && isShowEmptyView -> {
                 TYPE_EMPTY_VIEW
             }
             else -> super.getItemViewType(position)
@@ -135,12 +150,11 @@ abstract class BaseRecyclerAdapter<T>(
             }
             onBindChildViewHolder(holder, index)
             initHolderEvent(holder, index)
-        }else if (holder is EmptyViewHolder){
-            if (!isFirstShowEmptyView){
-                holder.itemView.isVisible = false
-                isFirstShowEmptyView = true
-            }else{
-                holder.itemView.isVisible = true
+        } else if (holder is EmptyViewHolder) {
+            holder.mAivEmpty.setImageResource(mEmptyRes)
+            holder.mAtvContent.text = mEmptyText
+            holder.itemView.setOnClickListener {
+                mOnRecyclerViewItemClickListener?.clickEmptyView(it)
             }
         }
         Log.w("BaseRecyclerAdapter--", "onBindViewHolder->type:$itemType--position:$position")
@@ -172,9 +186,14 @@ abstract class BaseRecyclerAdapter<T>(
     override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
         super.onViewAttachedToWindow(holder)
         val layoutParams: ViewGroup.LayoutParams = holder.itemView.layoutParams
-        if (layoutParams is StaggeredGridLayoutManager) {
+        /*  if (layoutParams is StaggeredGridLayoutManager) {
+              val position = holder.adapterPosition
+              layoutParams.spanCount = if (isSingSpanCount(position)) 1 else layoutParams.spanCount
+              holder.itemView.layoutParams = layoutParams
+          }*/
+        if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
             val position = holder.adapterPosition
-            layoutParams.spanCount = if (isSingSpanCount(position)) 1 else layoutParams.spanCount
+            layoutParams.isFullSpan = isSingSpanCount(position)
             holder.itemView.layoutParams = layoutParams
         }
         Log.w("BaseRecyclerAdapter--", "onViewAttachedToWindow->position:${holder.adapterPosition}")
