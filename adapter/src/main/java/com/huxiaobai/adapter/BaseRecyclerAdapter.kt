@@ -148,8 +148,8 @@ abstract class BaseRecyclerAdapter<T>(
             if (mHasHeadView) {
                 index -= 1
             }
-            onBindChildViewHolder(holder, index)
             initHolderEvent(holder, index)
+            onBindChildViewHolder(holder, index)
         } else if (holder is EmptyViewHolder) {
             holder.mAivEmpty.setImageResource(mEmptyRes)
             holder.mAtvContent.text = mEmptyText
