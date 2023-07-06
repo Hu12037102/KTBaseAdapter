@@ -114,12 +114,15 @@ abstract class BaseRecyclerAdapter<T>(
             isHeadViewPosition(position) -> {
                 TYPE_HEAD_VIEW
             }
+
             isFootViewPosition(position) -> {
                 TYPE_FOOT_VIEW
             }
+
             BaseCompat.listSize(mData) == 0 && isShowEmptyView -> {
                 TYPE_EMPTY_VIEW
             }
+
             else -> super.getItemViewType(position)
         }
         Log.w("BaseRecyclerAdapter--", "getItemViewType:$type")
@@ -130,10 +133,12 @@ abstract class BaseRecyclerAdapter<T>(
         val viewHolder = when (viewType) {
             TYPE_HEAD_VIEW ->
                 BaseViewHolder(mHeadParentGroup)
+
             TYPE_FOOT_VIEW -> BaseViewHolder(mFootParentGroup)
             TYPE_EMPTY_VIEW -> EmptyViewHolder(
                 LayoutInflater.from(mContext).inflate(R.layout.item_empty_view, parent, false)
             )
+
             else -> onCreateChildViewHolder(parent, viewType)
         }
         Log.w("BaseRecyclerAdapter--", "onCreateViewHolder:$viewHolder")
@@ -142,7 +147,7 @@ abstract class BaseRecyclerAdapter<T>(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val itemType = getItemViewType(position)
+        /*val itemType = getItemViewType(position)
         if (itemType == 0) {
             var index = position
             if (mHasHeadView) {
@@ -156,8 +161,46 @@ abstract class BaseRecyclerAdapter<T>(
             holder.itemView.setOnClickListener {
                 mOnRecyclerViewItemClickListener?.clickEmptyView(it)
             }
+        }*/
+
+        /* if (itemType == 0) {
+             var index = position
+             if (mHasHeadView) {
+                 index -= 1
+             }
+             initHolderEvent(holder, index)
+             onBindChildViewHolder(holder, index)
+         } else */
+
+        val itemType = getItemViewType(position)
+        if (holder is EmptyViewHolder) {
+            holder.mAivEmpty.setImageResource(mEmptyRes)
+            holder.mAtvContent.text = mEmptyText
+            holder.itemView.setOnClickListener {
+                mOnRecyclerViewItemClickListener?.clickEmptyView(it)
+            }
+        } else if (itemType == TYPE_HEAD_VIEW) {
+            onBindHeadViewHolder(holder, position)
+        } else if (itemType == TYPE_FOOT_VIEW) {
+            onBindFootViewHolder(holder, position)
+        } else {
+            var index = position
+            if (mHasHeadView) {
+                index -= 1
+            }
+            initHolderEvent(holder, index)
+            onBindChildViewHolder(holder, index)
         }
+
         Log.w("BaseRecyclerAdapter--", "onBindViewHolder->type:$itemType--position:$position")
+    }
+
+    protected open fun onBindHeadViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+
+    }
+
+    protected open fun onBindFootViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+
     }
 
     private fun initHolderEvent(holder: RecyclerView.ViewHolder, position: Int) {
