@@ -123,11 +123,13 @@ abstract class BaseRecyclerAdapter<T>(
                 TYPE_EMPTY_VIEW
             }
 
-            else -> super.getItemViewType(position)
+            else -> getChildItemViewType(position)
         }
         Log.w("BaseRecyclerAdapter--", "getItemViewType:$type")
         return type
     }
+
+    protected open fun getChildItemViewType(position: Int) = super.getItemViewType(position)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val viewHolder = when (viewType) {
